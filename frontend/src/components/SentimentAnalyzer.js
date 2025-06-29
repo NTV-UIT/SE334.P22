@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Send, SentimentSatisfied, SentimentNeutral, SentimentDissatisfied } from '@mui/icons-material';
 import axios from 'axios';
+import { formatVietnameseDateTime } from '../utils/timeUtils';
 
 const SentimentAnalyzer = () => {
   const [text, setText] = useState('');
@@ -154,6 +155,10 @@ const SentimentAnalyzer = () => {
             
             <Typography variant="body2" color="text.secondary">
               Văn bản được phân tích: "{text}"
+            </Typography>
+            
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              Thời gian phân tích: {formatVietnameseDateTime(new Date())}
             </Typography>
           </Paper>
         )}

@@ -118,6 +118,12 @@ React app sẽ chạy trên: `http://localhost:3000`
 - Username: postgres
 - Password: Vinh_132004
 
+## Cấu hình Timezone
+Hệ thống được cấu hình để sử dụng múi giờ Việt Nam (Asia/Ho_Chi_Minh, UTC+7):
+- Tất cả thời gian lưu trữ trong database theo giờ VN
+- API trả về thời gian theo múi giờ VN
+- Frontend hiển thị thời gian theo định dạng Việt Nam
+
 ## Troubleshooting
 
 ### Lỗi kết nối database

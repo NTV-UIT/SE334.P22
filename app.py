@@ -9,6 +9,10 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.io as pio
 import os
+import pytz
+
+# Múi giờ Việt Nam
+VN_TIMEZONE = pytz.timezone('Asia/Ho_Chi_Minh')
 
 # Flask app
 app = Flask(__name__)
@@ -36,7 +40,7 @@ class Sentiment(Base):
     id = Column(Integer, primary_key=True)
     text = Column(String)
     label = Column(String)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.datetime.now(VN_TIMEZONE).replace(tzinfo=None))
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
@@ -64,7 +68,7 @@ def trend():
     interval = request.args.get('interval', 'day')
     from sqlalchemy import func, extract, cast, String
     from datetime import datetime, timedelta
-    today = datetime.utcnow()
+    today = datetime.now(VN_TIMEZONE)
     start_date = today - timedelta(days=29)
     # Xử lý group theo interval an toàn
     if interval == 'second':
@@ -107,12 +111,12 @@ def trend():
 
 @app.route("/current-time", methods=["GET"])
 def current_time():
-    """Endpoint để kiểm tra thời gian hiện tại"""
-    current = datetime.datetime.now()
+    """Endpoint để kiểm tra thời gian hiện tại theo múi giờ Việt Nam"""
+    current = datetime.datetime.now(VN_TIMEZONE)
     return jsonify({
         "current_time": current.strftime("%Y-%m-%d %H:%M:%S"),
         "timestamp": current.timestamp(),
-        "timezone": "Local Time"
+        "timezone": "Asia/Ho_Chi_Minh (UTC+7)"
     })
 
 @app.route("/")
