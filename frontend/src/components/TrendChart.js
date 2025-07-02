@@ -21,7 +21,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import axios from 'axios';
+import { getTrend } from '../utils/api';
 
 ChartJS.register(
   CategoryScale,
@@ -41,9 +41,8 @@ const TrendChart = () => {
   const fetchTrendData = async (selectedInterval) => {
     setLoading(true);
     setError('');
-    
     try {
-      const response = await axios.get(`http://localhost:4101/api/trend?interval=${selectedInterval}`);
+      const response = await getTrend(selectedInterval);
       setTrendData(response.data);
     } catch (err) {
       setError('Không thể tải dữ liệu xu hướng. Vui lòng thử lại.');
@@ -65,16 +64,9 @@ const TrendChart = () => {
     if (!trendData) return null;
 
     const periods = Object.keys(trendData).sort();
-    const positiveData = [];
-    const negativeData = [];
-    const neutralData = [];
-
-    periods.forEach(period => {
-      const data = trendData[period];
-      positiveData.push(data.positive || 0);
-      negativeData.push(data.negative || 0);
-      neutralData.push(data.neutral || 0);
-    });
+    const positiveData = periods.map(period => (trendData[period]?.positive || 0));
+    const negativeData = periods.map(period => (trendData[period]?.negative || 0));
+    const neutralData = periods.map(period => (trendData[period]?.neutral || 0));
 
     return {
       labels: periods,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, Box, Chip } from '@mui/material';
 import { AccessTime, Schedule } from '@mui/icons-material';
-import axios from 'axios';
+import { getCurrentTime } from '../utils/api';
 
 const RealTimeStatus = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -21,7 +21,7 @@ const RealTimeStatus = () => {
   useEffect(() => {
     const fetchServerTime = async () => {
       try {
-        const response = await axios.get('http://localhost:4101/api/current-time');
+        const response = await getCurrentTime();
         setServerTime(new Date(response.data.current_time));
         setLastSync(new Date());
       } catch (error) {
@@ -38,32 +38,23 @@ const RealTimeStatus = () => {
     return () => clearInterval(syncTimer);
   }, []);
 
-  const formatTime = (date) => {
-    if (!date) return '--:--:--';
-    return date.toLocaleTimeString('vi-VN', {
+
+  const formatTime = (date) =>
+    date?.toLocaleTimeString('vi-VN', {
       hour12: false,
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
-    });
-  };
+    }) ?? '--:--:--';
 
-  const formatDate = (date) => {
-    if (!date) return '--/--/----';
-    return date.toLocaleDateString('vi-VN', {
+  const formatDate = (date) =>
+    date?.toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
-    });
-  };
+    }) ?? '--/--/----';
 
-  const getTimeDifference = () => {
-    if (!serverTime) return null;
-    const diff = Math.abs(currentTime.getTime() - serverTime.getTime());
-    return Math.floor(diff / 1000); // seconds
-  };
-
-  const timeDiff = getTimeDifference();
+  const timeDiff = serverTime ? Math.floor(Math.abs(currentTime.getTime() - serverTime.getTime()) / 1000) : null;
 
   return (
     <Paper 

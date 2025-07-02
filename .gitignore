@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cấu hình môi trường
+.env
+.venv/
+venv/
+ENV/
+env.bak/
+
+# Thư mục node_modules
+node_modules/
+
+# Log files
+*.log
+
+# Thư mục build, dist
+build/
+dist/
+
+# Thư mục cache
+.cache/
+
+# VSCode settings
+.vscode/
+
+# Thư mục dữ liệu tạm
+*.sqlite3
+*.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Các file khác không cần thiết
+*.bak
+*.tmp
+
+# Ignore các file hệ thống
+*.swp
+*.swo
+
+# Ignore các file test output
+*.out
+*.test.js

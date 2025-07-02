@@ -1,0 +1,9 @@
+# ESLint
+eslint
+.eslintrc.js
+
+# Prettier
+.prettierrc
+
+# Ignore node_modules
+node_modules/

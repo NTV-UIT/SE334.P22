@@ -12,7 +12,7 @@ import {
   Paper
 } from '@mui/material';
 import { Send, SentimentSatisfied, SentimentNeutral, SentimentDissatisfied } from '@mui/icons-material';
-import axios from 'axios';
+import { analyzeSentiment } from '../utils/api';
 import { formatVietnameseDateTime } from '../utils/timeUtils';
 
 const SentimentAnalyzer = () => {
@@ -22,17 +22,12 @@ const SentimentAnalyzer = () => {
   const [error, setError] = useState('');
 
   const handleAnalyze = async () => {
-    if (!text.trim()) {
-      setError('Vui lòng nhập văn bản để phân tích');
-      return;
-    }
-
     setLoading(true);
     setError('');
     setResult(null);
 
     try {
-      const response = await axios.post('http://localhost:4101/api/analyze', { text });
+      const response = await analyzeSentiment(text);
       setResult(response.data);
     } catch (err) {
       setError('Có lỗi xảy ra khi phân tích văn bản. Vui lòng thử lại.');
@@ -99,7 +94,7 @@ const SentimentAnalyzer = () => {
             fullWidth
             variant="contained"
             onClick={handleAnalyze}
-            disabled={loading}
+            disabled={loading || !text.trim()}
             startIcon={loading ? <CircularProgress size={20} /> : <Send />}
             sx={{ 
               py: 1.5, 

@@ -49,8 +49,11 @@ Session = sessionmaker(bind=engine)
 def analyze():
     data = request.json
     text = data.get("text", "")
+    # Sử dụng validation khai báo với Flask request schema (nâng cao: có thể dùng Marshmallow hoặc Flask-Inputs)
+    # Để giữ code đơn giản, có thể dùng abort với code 400 nếu thiếu text
+    from flask import abort
     if not text:
-        return jsonify({"error": "No text provided"}), 400
+        abort(400, description="No text provided")
     # Xử lý đầu ra đặc biệt cho model cardiffnlp
     result = sentiment_pipeline(text)[0]
     # Một số version trả về label là 'LABEL_0', 'LABEL_1', 'LABEL_2'
@@ -101,13 +104,10 @@ def trend():
         Sentiment.label
     ).order_by(group_expr).all()
     session.close()
-    trend_dict = {}
-    for row in results:
-        period_str = row.period
-        if period_str not in trend_dict:
-            trend_dict[period_str] = {}
-        trend_dict[period_str][row.label] = row.count
-    return trend_dict
+    from collections import defaultdict
+    temp_dict = defaultdict(dict)
+    [temp_dict[row.period].update({row.label: row.count}) for row in results]
+    return dict(temp_dict)
 
 @app.route("/current-time", methods=["GET"])
 def current_time():
