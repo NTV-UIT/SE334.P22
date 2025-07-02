@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from marshmallow import Schema, fields, ValidationError
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import torch
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, func
@@ -45,21 +46,23 @@ class Sentiment(Base):
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
+
+# Marshmallow schema for input validation
+class AnalyzeSchema(Schema):
+    text = fields.String(required=True)
+
+analyze_schema = AnalyzeSchema()
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.json
-    text = data.get("text", "")
-    # Sử dụng validation khai báo với Flask request schema (nâng cao: có thể dùng Marshmallow hoặc Flask-Inputs)
-    # Để giữ code đơn giản, có thể dùng abort với code 400 nếu thiếu text
-    from flask import abort
-    if not text:
-        abort(400, description="No text provided")
-    # Xử lý đầu ra đặc biệt cho model cardiffnlp
+    try:
+        data = analyze_schema.load(request.json)
+    except ValidationError as err:
+        return jsonify({"error": err.messages}), 400
+    text = data["text"]
     result = sentiment_pipeline(text)[0]
-    # Một số version trả về label là 'LABEL_0', 'LABEL_1', 'LABEL_2'
     label_id = int(result["label"].replace("LABEL_", "")) if result["label"].startswith("LABEL_") else result["label"].lower()
     label = LABELS[label_id] if isinstance(label_id, int) else label_id
-    # Save to DB (declarative ORM)
     with Session() as session:
         session.add(Sentiment(text=text, label=label))
         session.commit()
@@ -104,10 +107,13 @@ def trend():
         Sentiment.label
     ).order_by(group_expr).all()
     session.close()
-    from collections import defaultdict
-    temp_dict = defaultdict(dict)
-    [temp_dict[row.period].update({row.label: row.count}) for row in results]
-    return dict(temp_dict)
+    # Sử dụng pandas để tăng tính declarative khi pivot dữ liệu
+    df = pd.DataFrame(results, columns=["period", "label", "count"])
+    if not df.empty:
+        pivot = df.pivot(index="period", columns="label", values="count").fillna(0).astype(int)
+        return pivot.to_dict(orient="index")
+    else:
+        return {}
 
 @app.route("/current-time", methods=["GET"])
 def current_time():
